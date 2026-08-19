@@ -1,0 +1,28 @@
+name: Rebuild built JS asset
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "assets/_js_parts/**"
+      - ".github/scripts/rebuild-js.py"
+      - ".github/workflows/rebuild-js.yml"
+permissions:
+  contents: write
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild JS from wrapped parts
+        run: python3 .github/scripts/rebuild-js.py
+      - name: Commit rebuilt asset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/index-BdOqqwd8.js
+          if git diff --cached --quiet; then
+            echo "No JS change"
+          else
+            git commit -m "Add built interactive site assets"
+            git push
+          fi
